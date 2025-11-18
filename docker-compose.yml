@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    extends:
+      file: ./app/docker-compose.yml
+      service: app
+    networks:
+      - monitoring
+
+  prometheus:
+    extends:
+      file: ./monitoring/prometheus/docker-compose.yml
+      service: prometheus
+    networks:
+      - monitoring
+
+  cadvisor:
+    extends:
+      file: ./monitoring/cadvisor/docker-compose.yml
+      service: cadvisor
+    networks:
+      - monitoring      
+
+  grafana:
+    extends:
+      file: ./monitoring/grafana/docker-compose.yml
+      service: grafana
+    networks:
+      - monitoring
+
+volumes:
+  prometheus_data:
+    driver: local
+
+networks:
+  monitoring:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "172.30.0.0/24"

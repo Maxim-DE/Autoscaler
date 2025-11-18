@@ -1,0 +1,45 @@
+
+services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    privileged: true
+    command:
+      - -docker_only=false
+      # - -disable_metrics=percpu,tcp,udp,process
+      - -docker=unix:///var/run/docker.sock
+    networks:
+      monitoring:
+        ipv4_address: 172.30.0.25
+
+
+
+# version: '3.8'
+
+# services:
+#   cadvisor:
+#     image: gcr.io/cadvisor/cadvisor:latest
+#     container_name: cadvisor
+#     restart: unless-stopped
+#     ports:
+#       - "8080:8080"
+#     volumes:
+#       - /:/rootfs:ro
+#       - /var/run:/var/run:rw
+#       - /sys:/sys:ro
+#       - /var/lib/docker/:/var/lib/docker:ro
+#     privileged: true
+#     networks:
+#       monitoring:
+#         ipv4_address: 172.30.0.25
+
+
+        

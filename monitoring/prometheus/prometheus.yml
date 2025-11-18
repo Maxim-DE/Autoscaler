@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Мониторинг самого Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['172.30.0.20:9090']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['172.30.0.25:8080']
+    scrape_interval: 10s
+
+  # Мониторинг вашей Node.js ноды
+  - job_name: 'nodejs-app'
+    static_configs:
+      - targets: ['172.30.0.10:4000']  # специальный хост для доступа к хосту
+    scrape_interval: 10s
+    metrics_path: '/metrics'  # путь к метрикам (обычно /metrics)
+
