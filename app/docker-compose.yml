@@ -6,11 +6,20 @@ services:
     image: web-service
     restart: unless-stopped
     ports:
-      - "4000:4000"
+      - target: 4000           # порт в контейнере
+        published: 4000        # внешний порт
+        protocol: tcp
+        mode: ingress          # ⬅️ для балансировки между репликами
     environment:
       - NODE_ENV=production
       - PORT=4000
     deploy:
+      replicas: 3  # рекомендуется указать количество реплик
+      # placement:
+      #   constraints:
+      #     # - node.role != manager
+      #     # - node.role == worker  # размещать ТОЛЬКО на worker нодах    
+      #     # - node.hostname == VPS2
       resources:
         limits:
           memory: 128M

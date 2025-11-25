@@ -35,7 +35,8 @@ volumes:
 
 networks:
   monitoring:
-    driver: bridge
+    driver: overlay  
+    attachable: true  
     ipam:
       config:
         - subnet: "172.30.0.0/24"
