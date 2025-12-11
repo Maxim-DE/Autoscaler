@@ -1,6 +1,7 @@
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  scrape_timeout: 10s
 
 scrape_configs:
   # Prometheus сам себя
@@ -11,17 +12,31 @@ scrape_configs:
   # Node-exporter
   - job_name: 'node-exporter'
     static_configs:
-      - targets: ['node-exporter:9100']
+      - targets:
+          - '45.84.224.156:9100'
+          - '155.212.223.84:9100'
+          - '45.12.19.151:9100'      
 
-  # Cadvisor
+# Cadvisor
   - job_name: 'cadvisor'
     static_configs:
-      - targets: ['cadvisor:8080']
+      # Manager сервер
+      - targets: ['45.84.224.156:8080']
+        labels:
+          instance: 'Manager'
+          node_name: 'Manager'
+          node_role: 'manager'
       
-  # Docker Swarm (опционально)
-  - job_name: 'docker-swarm'
-    static_configs:
-      - targets:
-        - 'manager:9323'
-        - 'worker1:9323'
-        - 'worker2:9323'
+      # Worker1 сервер  
+      - targets: ['155.212.223.84:8080']
+        labels:
+          instance: 'Worker1'
+          node_name: 'Worker1'
+          node_role: 'worker'
+      
+      # Worker2 сервер
+      - targets: ['45.12.19.151:8080']
+        labels:
+          instance: 'Worker2'
+          node_name: 'Worker2'
+          node_role: 'worker'
