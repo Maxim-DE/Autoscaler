@@ -2,10 +2,27 @@ version: '3.8'
 
 services:
   # 0. Visualizer - только на manager
+  # visualizer:
+  #   image: dockersamples/visualizer
+  #   ports:
+  #     - published: 8081
+  #       target: 8080
+  #       mode: host
+  #   volumes:
+  #     - type: bind
+  #       source: /var/run/docker.sock
+  #       target: /var/run/docker.sock
+  #   deploy:
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.role==manager
+
+# 0. Visualizer - визуализация Swarm кластера
   visualizer:
     image: dockersamples/visualizer
     ports:
-      - published: 8081
+      - published: 7070
         target: 8080
         mode: host
     volumes:
@@ -16,7 +33,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.role==worker
+          - node.role==manager
 
   # 1. Cadvisor - метрики контейнеров и Docker
   cadvisor:
