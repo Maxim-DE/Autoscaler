@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # 0. Visualizer - только на manager
+  # visualizer:
+  #   image: dockersamples/visualizer
+  #   ports:
+  #     - published: 8081
+  #       target: 8080
+  #       mode: host
+  #   volumes:
+  #     - type: bind
+  #       source: /var/run/docker.sock
+  #       target: /var/run/docker.sock
+  #   deploy:
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.role==manager
+
+# 0. Visualizer - визуализация Swarm кластера
+  visualizer:
+    image: dockersamples/visualizer
+    ports:
+      - published: 7070
+        target: 8080
+        mode: host
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role==manager
+
+  # 1. Cadvisor - метрики контейнеров и Docker
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - published: 8080
+        target: 8080
+        mode: host
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    deploy:
+      mode: global
+    privileged: true
+
+  # 2. Node-exporter - системные метрики хоста
+  node-exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - published: 9100
+        target: 9100
+        mode: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    deploy:
+      mode: global
+
+  # 3. Prometheus - сбор и хранение метрик (адаптировано из compose)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - published: 9000  
+        target: 9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml 
+      - ./prometheus/rules:/etc/prometheus/rules                   
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role==manager
+
+# 2. Alertmanager - уведомления (ДОБАВЬТЕ этот сервис)
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - published: 9093
+        target: 9093
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml  # конфиг
+      - alertmanager-data:/alertmanager                      # данные
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--log.level=info'
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role==manager
+
+  # 4. Grafana - визуализация
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - published: 3000
+        target: 3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role==manager
+
+volumes:
+  prometheus-data:
+  grafana-data:
+  alertmanager-data:

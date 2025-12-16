@@ -1,0 +1,32 @@
+global:
+  # Пока пусто - для тестирования
+
+route:
+  # Группировка алертов по имени
+  group_by: ['alertname']
+  
+  # Задержка перед отправкой первой группы
+  group_wait: 10s
+  
+  # Интервал отправки для той же группы алертов
+  group_interval: 10s
+  
+  # Интервал повторной отправки для уже отправленных алертов
+  repeat_interval: 1h
+  
+  # Получатель по умолчанию
+  receiver: 'web.hook'
+
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://example.com/post'  # Фиктивный URL для теста
+        # В логах будем видеть ошибки отправки, но алерты будут обрабатываться
+
+# Подавление алертов (inhibition rules) - опционально
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']

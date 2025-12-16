@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  my-nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    deploy:
+      mode: replicated
+      replicas: 4
+      # Дополнительные настройки развертывания (опционально)
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.128'
+          memory: 128M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
