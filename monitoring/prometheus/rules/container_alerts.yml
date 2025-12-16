@@ -1,0 +1,16 @@
+groups:
+  - name: docker_container_alerts
+    rules:
+      - alert: DockerContainerHighMemory
+        expr: container_memory_usage_bytes{image!=""} > 134217728
+        for: 2m
+        labels:
+          severity: warning
+          alert_type: docker_memory
+        annotations:
+          summary: "Docker контейнер {{ $labels.name }} использует >128 МБ"
+          description: |
+            Контейнер: {{ $labels.name }}
+            Образ: {{ $labels.image }}
+            Память: >128 МБ
+            Хост: {{ $labels.instance }}

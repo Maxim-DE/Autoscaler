@@ -74,10 +74,11 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - published: 9000  # Изменен порт с 9090 на 9000 (как в compose)
+      - published: 9000  
         target: 9090
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml 
+      - ./prometheus/rules:/etc/prometheus/rules                   
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -86,6 +87,25 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role==manager
+
+# 2. Alertmanager - уведомления (ДОБАВЬТЕ этот сервис)
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - published: 9093
+        target: 9093
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml  # конфиг
+      - alertmanager-data:/alertmanager                      # данные
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--log.level=info'
     deploy:
       replicas: 1
       placement:
@@ -115,3 +135,4 @@ services:
 volumes:
   prometheus-data:
   grafana-data:
+  alertmanager-data:
