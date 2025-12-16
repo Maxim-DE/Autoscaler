@@ -100,8 +100,8 @@ services:
       - published: 9093
         target: 9093
     volumes:
-      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml  # конфиг
-      - alertmanager-data:/alertmanager                      # данные
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml  # конфиг
+      - ./alertmanager/alertmanager-data:/alertmanager                      # данные (bind mount)
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
       - '--storage.path=/alertmanager'
