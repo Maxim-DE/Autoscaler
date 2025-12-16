@@ -1,11 +1,12 @@
 version: '3.8'
 
 services:
-  # 0. Visualizer - только на manager
+
+# 0. Visualizer - визуализация Swarm кластера
   # visualizer:
   #   image: dockersamples/visualizer
   #   ports:
-  #     - published: 8081
+  #     - published: 7070
   #       target: 8080
   #       mode: host
   #   volumes:
@@ -17,23 +18,6 @@ services:
   #     placement:
   #       constraints:
   #         - node.role==manager
-
-# 0. Visualizer - визуализация Swarm кластера
-  visualizer:
-    image: dockersamples/visualizer
-    ports:
-      - published: 7070
-        target: 8080
-        mode: host
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role==manager
 
   # 1. Cadvisor - метрики контейнеров и Docker
   cadvisor:
@@ -113,24 +97,24 @@ services:
           - node.role==manager
 
   # 4. Grafana - визуализация
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - published: 3000
-        target: 3000
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel
-      - GF_USERS_ALLOW_SIGN_UP=false
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/etc/grafana/dashboards
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role==manager
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   ports:
+  #     - published: 3000
+  #       target: 3000
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #     - GF_INSTALL_PLUGINS=grafana-piechart-panel
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #   volumes:
+  #     - grafana-data:/var/lib/grafana
+  #     - ./grafana/provisioning:/etc/grafana/provisioning
+  #     - ./grafana/dashboards:/etc/grafana/dashboards
+  #   deploy:
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.role==manager
 
 volumes:
   prometheus-data:

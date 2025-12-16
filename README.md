@@ -28,8 +28,9 @@
 
 
 
+
 docker stack deploy -c monitoring/monitoring-stack.yml monitoring
 docker stack services monitoring/
 
- docker stack rm monitoring
+docker stack rm monitoring
 
