@@ -2,7 +2,8 @@ groups:
   - name: docker_container_alerts
     rules:
       - alert: DockerContainerHighMemory
-        expr: container_memory_usage_bytes{image!=""} > 134217728
+        # expr: container_memory_usage_bytes{image=~".*nginx.*"} > 134217728    #128 МБ
+        expr: container_memory_usage_bytes{image=~".*nginx.*"}   > 10485760       #10 МБ     Что бы всегда ловить ошибки для отладки
         for: 2m
         labels:
           severity: warning

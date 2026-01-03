@@ -116,6 +116,24 @@ services:
   #       constraints:
   #         - node.role==manager
 
+# 5. Python Webhook Receiver - принимает алерты от Alertmanager
+  webhook-receiver:
+    image: python:3.11-alpine
+    ports:
+      - published: 9099
+        target: 9099
+    volumes:
+       - /root/Autoscaler/autoscaler/src:/app  
+    working_dir: /app
+    command: python main.py  # или python main2.py - выбирайте какой нужен
+    environment:
+      - PYTHONUNBUFFERED=1     # Важно для логов в Docker
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role==manager
+
 volumes:
   prometheus-data:
   grafana-data:

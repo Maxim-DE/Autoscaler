@@ -11,13 +11,13 @@ alerting:
     - static_configs:
         - targets:
           # Укажите ваш Alertmanager
-          - localhost:9093
+          - '45.84.224.156:9093'
 
 scrape_configs:
   # Prometheus сам себя
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['localhost:9093']
 
   # Node-exporter
   - job_name: 'node-exporter'

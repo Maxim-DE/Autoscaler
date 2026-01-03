@@ -12,7 +12,8 @@ route:
   group_interval: 10s
   
   # Интервал повторной отправки для уже отправленных алертов
-  repeat_interval: 1h
+  # repeat_interval: 1h
+  repeat_interval: 60s
   
   # Получатель по умолчанию
   receiver: 'web.hook'
@@ -20,7 +21,7 @@ route:
 receivers:
   - name: 'web.hook'
     webhook_configs:
-      - url: 'http://example.com/post'  # Фиктивный URL для теста
+      - url: 'http://45.84.224.156:9099'
         # В логах будем видеть ошибки отправки, но алерты будут обрабатываться
 
 # Подавление алертов (inhibition rules) - опционально

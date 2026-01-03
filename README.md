@@ -25,12 +25,34 @@
 - Сделать скрипты на питоне который может изменять кол-во реплик (подключить докер в питон)
 - Добавить свой микросервис (надо на докер хаб его выложить)
 
+Результат
+- Добавил в стек alertmanager 
+- Причесал проект 
+- Настроил alertmanager  
+- Сделал http server который ловит сообщения от alertmanager  
+
+
+Надо добавить http server в стек мониторинга !! 
 
 
 
 
+
+
+
+
+
+
+Команды для работы с стеком приложения 
+docker stack deploy -c Autoscaler/app/nginx-app-stack.yml nginx-app
+docker service scale nginx-app=5
+docker service rm nginx-app_my-nginx
+
+
+Команды для работы с стеком мониторинга 
 docker stack deploy -c monitoring/monitoring-stack.yml monitoring
 docker stack services monitoring/
 
 docker stack rm monitoring
+
 

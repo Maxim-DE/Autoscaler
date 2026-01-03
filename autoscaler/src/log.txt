@@ -1,0 +1,6 @@
+=== Webhook Receiver Log Started at 2026-01-03 12:43:45 ===
+Script: main.py
+Log file: /app/log.txt
+============================================================
+[2026-01-03 12:43:45] Server starting on port 9099
+[2026-01-03 12:43:45] Server started successfully
