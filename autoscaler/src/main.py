@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# Скрипт для приема сообщений от промитеуса
+
 import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import sys
