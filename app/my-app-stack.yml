@@ -7,8 +7,13 @@ services:
       - "80:4000"
     deploy:
       mode: replicated
-      replicas: 2
+      
+      # replicas: 2
       # Дополнительные настройки развертывания (опционально)
+      labels:
+        swarm.autoscaler: 'true'
+        swarm.autoscaler.maximum: '6'
+        swarm.autoscaler.minimum: '1'      
       placement:
         constraints:
           - node.role == worker

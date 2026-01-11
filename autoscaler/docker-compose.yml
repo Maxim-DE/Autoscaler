@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  docker_swarm_autoscaler:
+    build: .
+    container_name: docker-swarm-autoscaler
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - PROMETHEUS_URL=http://45.84.224.156:9000
+      - LOOP=yes
+      - CPU_PERCENTAGE_UPPER_LIMIT=85
+      - CPU_PERCENTAGE_LOWER_LIMIT=25
+      - CHECK_INTERVAL=60
+    restart: unless-stopped
