@@ -1,0 +1,36 @@
+
+
+
+План 
+- Сделать отправку алертов из промитеуса при нагрузке 
+- Сделать сервер http для приема алертов из промитеса 
+- Сделать скрипты на питоне который может изменять кол-во реплик (подключить докер в питон)
+- Добавить свой микросервис (надо на докер хаб его выложить)
+
+Результат
+- Добавил в стек alertmanager 
+- Причесал проект 
+- Настроил alertmanager  
+- Сделал http server который ловит сообщения от alertmanager  
+- Заменил nginx на своё приложение 
+- Собрал приложение и залил на докер хаб 
+- Сделал в приложении запрос на эмитацию нагрузки в 100 MБ   http://45.12.19.151/memory-heavy
+- Сделал в приложении запрос на эмитацию нагрузки CPU        http://45.12.19.151/cpu-prime
+- Переделал питоновский скрипт на работу CPU на увеличение и уменьшение реплик (не проверял правда)
+
+
+
+
+Команды для работы с стеком приложения 
+docker stack deploy -c Autoscaler/app/nginx-app-stack.yml nginx-app
+docker service scale nginx-app=5
+docker service rm nginx-app_my-nginx
+
+
+Команды для работы с стеком мониторинга 
+docker stack deploy -c monitoring/monitoring-stack.yml monitoring
+docker stack services monitoring/
+
+docker stack rm monitoring
+
+

@@ -11,6 +11,72 @@ router.get('/', (req, res) => {
     });
 });
 
+// Эндпоинт для простой нагрузки на CPU (вычисление простых чисел)
+router.get('/cpu-prime', (req, res) => {
+    const limit = parseInt(req.query.limit) || 1000000; // До какого числа искать простые числа
+    const duration = parseInt(req.query.duration) || 1000; // Максимальное время работы
+    
+    console.log(`Поиск простых чисел до ${limit} (макс. ${duration}мс)`);
+    
+    try {
+        const startTime = Date.now();
+        
+        // Функция проверки числа на простоту
+        const isPrime = (num) => {
+            if (num <= 1) return false;
+            if (num <= 3) return true;
+            if (num % 2 === 0 || num % 3 === 0) return false;
+            
+            let i = 5;
+            while (i * i <= num) {
+                if (num % i === 0 || num % (i + 2) === 0) return false;
+                i += 6;
+            }
+            return true;
+        };
+        
+        // Находим простые числа
+        const primes = [];
+        let current = 2;
+        let iterations = 0;
+        
+        while (current <= limit && (Date.now() - startTime) < duration) {
+            if (isPrime(current)) {
+                primes.push(current);
+            }
+            current++;
+            iterations++;
+        }
+        
+        const actualDuration = Date.now() - startTime;
+        const cpuTime = process.cpuUsage();
+        
+        res.json({
+            message: `Выполнено ${iterations} проверок за ${actualDuration}мс`,
+            primesFound: primes.length,
+            limit: limit,
+            maxDuration: `${duration} мс`,
+            actualDuration: `${actualDuration} мс`,
+            container: process.env.HOSTNAME || 'unknown',
+            iterations: iterations,
+            lastPrime: primes.length > 0 ? primes[primes.length - 1] : null,
+            cpuUsage: {
+                user: `${Math.round(cpuTime.user / 1000)} мс`,
+                system: `${Math.round(cpuTime.system / 1000)} мс`
+            }
+        });
+        
+        console.log(`Найдено ${primes.length} простых чисел за ${actualDuration}мс`);
+        
+    } catch (error) {
+        console.error('Ошибка в вычислениях:', error.message);
+        res.status(500).json({
+            error: 'Ошибка создания CPU нагрузки',
+            message: error.message,
+            container: process.env.HOSTNAME || 'unknown'
+        });
+    }
+});
 
 // Эндпоинт для создания нагрузки на память быстрая не большая нагрузка jmetr нагрузит! 
 router.get('/memory-fast-heavy', (req, res) => {

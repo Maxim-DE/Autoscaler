@@ -7,7 +7,6 @@ services:
       - "80:4000"
     deploy:
       mode: replicated
-      
       # replicas: 2
       # Дополнительные настройки развертывания (опционально)
       labels:
@@ -19,7 +18,7 @@ services:
           - node.role == worker
       resources:
         limits:
-          cpus: '0.5'
+          cpus: '0.9'
           memory: 512M
         reservations:
           cpus: '0.128'

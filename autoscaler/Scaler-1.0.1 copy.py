@@ -9,11 +9,9 @@ sys.stderr.flush()
 import time
 import json
 import requests
-import subprocess
 from typing import List, Dict, Any, Optional
 from docker import DockerClient
 from docker.errors import DockerException, APIError
-
 
 # Отключаем буферизацию
 sys.stdout.reconfigure(line_buffering=True)  # Python 3.7+
@@ -29,7 +27,7 @@ LOOP = os.environ.get('LOOP', 'yes')
 CPU_PERCENTAGE_UPPER_LIMIT = int(os.environ.get('CPU_PERCENTAGE_UPPER_LIMIT', '85'))
 CPU_PERCENTAGE_LOWER_LIMIT = int(os.environ.get('CPU_PERCENTAGE_LOWER_LIMIT', '25'))
 CHECK_INTERVAL = int(os.environ.get('CHECK_INTERVAL', '10'))
-SERVICE_NAME = os.environ.get('SERVICE_NAME', 'my-app_my-app')  # имя вашего сервиса
+SERVICE_NAME = os.environ.get('SERVICE_NAME', 'my-app')  # имя вашего сервиса
 
 # URL Prometheus (ваш конкретный адрес)
 PROMETHEUS_URL = os.environ.get('PROMETHEUS_URL', 'http://45.84.224.156:9000')
@@ -256,9 +254,8 @@ class DockerSwarmAutoscaler:
                 return service.attrs['Spec']['Mode']['Replicated']['Replicas']
         return None
     
-    
     def default_scale(self, service_name: str) -> None:
-        """Проверить и масштабировать сервис до значений по умолчанию через docker scale"""
+        """Проверить и масштабировать сервис до значений по умолчанию"""
         try:
             service = self.get_service_by_name(service_name)
             if not service:
@@ -284,59 +281,25 @@ class DockerSwarmAutoscaler:
                 # Получаем текущее количество реплик
                 current_replicas = service.attrs['Spec']['Mode']['Replicated']['Replicas']
 
+                
                 # Проверяем и масштабируем при необходимости
                 if replica_minimum > current_replicas:
                     print(f"Service {service_name} is below the minimum. Scaling to the minimum of {replica_minimum}")
-                    
-                    # ЗАМЕНА: используем docker service scale
-                    scale_command = ['docker', 'service', 'scale', f'{service_name}={replica_minimum}']
-                    
-                    result = subprocess.run(
-                        scale_command,
-                        capture_output=True,
-                        text=True,
-                        check=False
-                    )
-                    
-                    if result.returncode == 0:
-                        print(f"Successfully scaled {service_name} to minimum {replica_minimum}")
-                    else:
-                        print(f"Error scaling to minimum: {result.stderr.strip()}")
-                        
+                    service.update(mode={'Replicated': {'Replicas': replica_minimum}})
                 elif current_replicas > replica_maximum:
                     print(f"Service {service_name} is above the maximum. Scaling to the maximum of {replica_maximum}")
-                    
-                    # ЗАМЕНА: используем docker service scale
-                    scale_command = ['docker', 'service', 'scale', f'{service_name}={replica_maximum}']
-                    
-                    result = subprocess.run(
-                        scale_command,
-                        capture_output=True,
-                        text=True,
-                        check=False
-                    )
-                    
-                    if result.returncode == 0:
-                        print(f"Successfully scaled {service_name} to maximum {replica_maximum}")
-                    else:
-                        print(f"Error scaling to maximum: {result.stderr.strip()}")
-                else:
-                    print(f"Service {service_name} is within limits ({current_replicas} replicas)")
-                    
+                    service.update(mode={'Replicated': {'Replicas': replica_maximum}})
             else:
                 print(f"Service {service_name} does not have an autoscale label.")
                 
         except (KeyError, APIError, DockerException) as e:
             print(f"Ошибка обработки сервиса {service_name}: {e}")
-        except Exception as e:
-            print(f"Общая ошибка в default_scale для {service_name}: {e}")
-
+    
     def scale_down(self, service_name: str) -> None:
-        """Уменьшить количество реплик сервиса через docker scale"""
+        """Уменьшить количество реплик сервиса"""
         try:
             service = self.get_service_by_name(service_name)
             if not service:
-                print(f"Сервис {service_name} не найден")
                 return
             
             labels = service.attrs['Spec']['Labels']
@@ -353,46 +316,24 @@ class DockerSwarmAutoscaler:
                 new_replicas = current_replicas - 1
                 
                 if replica_minimum <= new_replicas:
-                    print(f"Scaling down the service {service_name} from {current_replicas} to {new_replicas}")
-                    
-                    # ЗАМЕНА: используем docker service scale
-                    scale_command = ['docker', 'service', 'scale', f'{service_name}={new_replicas}']
-                    
-                    result = subprocess.run(
-                        scale_command,
-                        capture_output=True,
-                        text=True,
-                        check=False
-                    )
-                    
-                    if result.returncode == 0:
-                        print(f"Successfully scaled down {service_name} to {new_replicas}")
-                    else:
-                        print(f"Error scaling down: {result.stderr.strip()}")
-                        
+                    print(f"Scaling down the service {service_name} to {new_replicas}")
+                    service.update(mode={'Replicated': {'Replicas': new_replicas}})
                 elif current_replicas == replica_minimum:
-                    print(f"Service {service_name} already has the minimum number of replicas ({replica_minimum})")
-                else:
-                    print(f"Cannot scale down {service_name}: would be below minimum ({new_replicas} < {replica_minimum})")
-                    
-            else:
-                print(f"Service {service_name} is not marked for autoscaling")
+                    print(f"Service {service_name} has the minimum number of replicas.")
                     
         except (KeyError, APIError, DockerException) as e:
             print(f"Ошибка масштабирования сервиса {service_name} вниз: {e}")
-        except Exception as e:
-            print(f"Общая ошибка в scale_down для {service_name}: {e}")
-
     
     def scale_up(self, service_name: str) -> None:
-        """Увеличить количество реплик сервиса через docker scale"""
+        """Увеличить количество реплик сервиса"""
         try:
             service = self.get_service_by_name(service_name)
             if not service:
                 print(f"Сервис {service_name} не найден")
                 return
             
-            print(f"Сервис {service_name} найден")
+            print(f"Сервис {service_name}  найден")
+
 
             labels = service.attrs['Spec']['Labels']
             auto_scale_label = labels.get('swarm.autoscaler')
@@ -411,28 +352,10 @@ class DockerSwarmAutoscaler:
                     print(f"Service {service_name} already has the maximum of {replica_maximum} replicas")
                 elif replica_maximum >= new_replicas:
                     print(f"Scaling up the service {service_name} to {new_replicas}")
+                    service.update(mode={'Replicated': {'Replicas': new_replicas}})
                     
-                    # ЗАМЕНА: docker service scale вместо service.update()
-                    scale_command = ['docker', 'service', 'scale', f'{service_name}={new_replicas}']
-                    
-                    result = subprocess.run(
-                        scale_command,
-                        capture_output=True,
-                        text=True,
-                        check=False  # Не падать при ошибке, обработаем сами
-                    )
-                    
-                    if result.returncode == 0:
-                        print(f"Successfully scaled {service_name} to {new_replicas}")
-                        if result.stdout:
-                            print(f"Output: {result.stdout.strip()}")
-                    else:
-                        print(f"Error scaling {service_name}: {result.stderr.strip()}")
-                        
         except (KeyError, APIError, DockerException) as e:
             print(f"Ошибка масштабирования сервиса {service_name} вверх: {e}")
-        except subprocess.CalledProcessError as e:
-            print(f"Ошибка выполнения команды scale: {e}")
     
     def get_prometheus_data(self) -> Optional[Dict[str, Any]]:
         """Получить данные из Prometheus"""

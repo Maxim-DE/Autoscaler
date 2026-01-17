@@ -1,3 +1,8 @@
+
+# Данный скрипт ловит alarm от промитеуса 
+# И на основе него увеличивает кол-во реплик 
+# Уменьшать кол-во реплик данный скрипт не умеет
+
 from typing import Optional, Tuple
 import docker
 from docker.errors import DockerException, APIError

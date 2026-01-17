@@ -1,0 +1,6 @@
+services:
+  app:
+    build: .
+    ports:
+      - "80:4000"
+    image: m65535/web-service:latest 

@@ -35,24 +35,24 @@ services:
       mode: global
     privileged: true
 
-  # 2. Node-exporter - системные метрики хоста
-  node-exporter:
-    image: prom/node-exporter:latest
-    ports:
-      - published: 9100
-        target: 9100
-        mode: host
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    deploy:
-      mode: global
+  # # 2. Node-exporter - системные метрики хоста
+  # node-exporter:
+  #   image: prom/node-exporter:latest
+  #   ports:
+  #     - published: 9100
+  #       target: 9100
+  #       mode: host
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.rootfs=/rootfs'
+  #     - '--path.sysfs=/host/sys'
+  #     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+  #   deploy:
+  #     mode: global
 
   # 3. Prometheus - сбор и хранение метрик (адаптировано из compose)
   prometheus:
@@ -116,12 +116,19 @@ services:
         constraints:
           - node.role==manager
 
+
+  # 5. autoscaler
   docker-swarm-autoscaler:
-      image: jcwimer/docker-swarm-autoscaler:latest
+      image: m65535/autoscaler:latest
       volumes:
-        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - /var/run/docker.sock:/var/run/docker.sock
       environment:
-        - PROMETHEUS_URL=http://prometheus:9090
+        - SERVICE_NAME=my-app_my-app  
+        - PROMETHEUS_URL=http://45.84.224.156:9000
+        - LOOP=yes
+        - CPU_PERCENTAGE_UPPER_LIMIT=85
+        - CPU_PERCENTAGE_LOWER_LIMIT=25
+        - CHECK_INTERVAL=60      
       deploy:
         mode: replicated
         replicas: 1
@@ -130,7 +137,7 @@ services:
             - node.role == manager
         resources:
           limits:
-            cpus: '0.10'
+            cpus: '0.20'
             memory: 128M
           reservations:
             cpus: '0.10'
