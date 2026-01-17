@@ -11,6 +11,8 @@ http://45.84.224.156:3000/d/bc96dd35-dc52-4ae0-a77e-01c9e04e00cb/y0nei-s-cadviso
 # Приложение my-app
 http://155.212.223.84/
 
+# Cadvisor
+http://45.84.224.156:8080/
 
 
 # Пример запросов Prometheus на CPU приложения my-app на всех воркерах
